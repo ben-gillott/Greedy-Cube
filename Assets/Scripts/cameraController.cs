@@ -16,7 +16,7 @@ public class cameraController : MonoBehaviour
     }
 
      // Update is called once per frame
-     void Update () 
+     void LateUpdate () 
      {
         //Player location
         Vector3 point = new Vector3(target.position.x, target.position.y, transform.position.z);

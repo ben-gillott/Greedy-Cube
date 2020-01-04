@@ -5,41 +5,65 @@ using UnityEngine.Events;
 
 public class PlayerMovementController : MonoBehaviour
 {
-    public float m_JumpForce = 400f;	
+    public float m_JumpForce = 300f;	
+    public Vector3 StartPos = new Vector3(0f, 0f, 0f);
     private bool grounded = true;
-    private Rigidbody2D m_Rigidbody2D;
-    private float walkSpeed = 5;
+    private Rigidbody2D rb;
+    public CanvasGroup myCG;
+    private bool flash = false;
 
 
     private void Awake()
 	{
-        m_Rigidbody2D = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
 	}
 
 	private void Update()
 	{
+
+        //Handle left right change
         int horizontalChange = 0;
+
 		if (Input.GetKey("left"))
         {
-            // print("left key was pressed");
             horizontalChange --;
         }
         if (Input.GetKey("right"))
         {
-            // print("right key was pressed");
             horizontalChange ++;
         }
-        // If the player should jump
-		if (Input.GetKey("space") && grounded)
-		{
-            // print("space bar was pressed");
-			// Add a vertical force to the player.
-		    grounded = false;
-			m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
-		}
-
         Vector3 destination = this.transform.position + new Vector3(horizontalChange, 0, 0);
         this.transform.position = Vector3.Lerp(this.transform.position, destination, (float).1);
+
+
+        // On jump add a vertical force to the player.
+		if (Input.GetKey("space") && grounded)
+		{
+		    grounded = false;
+			rb.AddForce(new Vector2(0f, m_JumpForce));
+		}
+
+
+        //On Death
+        if(this.transform.position.y < -10 && flash == false){
+            flash = true;
+            myCG.alpha = 1;
+            this.transform.position = StartPos;
+            rb.velocity = new Vector2(0f, 0f);
+        }
+        if (flash)
+        {
+            myCG.alpha = myCG.alpha - Time.deltaTime;
+            
+            //Flash done
+            if (myCG.alpha <= 0)
+            {
+                myCG.alpha = 0;
+                flash = false;
+            }
+        }
+
+
 	}
 
     void OnCollisionExit2D(Collision2D other) {
