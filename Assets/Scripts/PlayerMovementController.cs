@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovementController : MonoBehaviour
 {
@@ -18,6 +19,29 @@ public class PlayerMovementController : MonoBehaviour
     private void Awake()
 	{
         rb = GetComponent<Rigidbody2D>();
+
+        if (Application.isEditor) {
+			for (int i = 0; i < SceneManager.sceneCount; i++) {
+				Scene loadedScene = SceneManager.GetSceneAt(i);
+				if (loadedScene.name.Contains("Level ")) {
+					SceneManager.SetActiveScene(loadedScene);
+					return;
+				}
+			}
+		}
+        
+        StartCoroutine(LoadLevel(1));
+	}
+
+	IEnumerator LoadLevel (int levelBuildIndex) {
+		enabled = false;
+		yield return SceneManager.LoadSceneAsync(
+			levelBuildIndex, LoadSceneMode.Additive
+		);
+		SceneManager.SetActiveScene(
+			SceneManager.GetSceneByBuildIndex(levelBuildIndex)
+		);
+		enabled = true;
 	}
 
 	private void Update()
@@ -80,7 +104,9 @@ public class PlayerMovementController : MonoBehaviour
     }
     void OnCollisionEnter2D(Collision2D col){
         if(col.gameObject.name == "Endpoint"){
+            //Transition to the next level
             Debug.Log("Hit end");
+            StartCoroutine(LoadLevel(2));
         }
         grounded = true;
     }
