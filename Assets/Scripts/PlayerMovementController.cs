@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Events;
 
 public class PlayerMovementController : MonoBehaviour
@@ -11,7 +12,8 @@ public class PlayerMovementController : MonoBehaviour
     private Rigidbody2D rb;
     public CanvasGroup myCG;
     private bool flash = false;
-
+    public Text scoreTxt;
+    private int score = 0;
 
     private void Awake()
 	{
@@ -46,10 +48,17 @@ public class PlayerMovementController : MonoBehaviour
 
         //On Death
         if(this.transform.position.y < -10 && flash == false){
+            //Setup flash effect
             flash = true;
             myCG.alpha = 1;
+
+            //Reset position and velocity
             this.transform.position = StartPos;
             rb.velocity = new Vector2(0f, 0f);
+            
+            //Reset the scoreboard
+            score ++;
+            scoreTxt.text = "Deaths: " + score;
         }
         if (flash)
         {
@@ -70,6 +79,9 @@ public class PlayerMovementController : MonoBehaviour
         grounded = false;
     }
     void OnCollisionEnter2D(Collision2D col){
+        if(col.gameObject.name == "Endpoint"){
+            Debug.Log("Hit end");
+        }
         grounded = true;
     }
 

@@ -6,7 +6,7 @@ public class cameraController : MonoBehaviour
 {
     public float dampTime = 0.15f;
     private Vector3 velocity = Vector3.zero;
-    public Transform target;
+    private Transform target;
 
 
     // Start is called before the first frame update
