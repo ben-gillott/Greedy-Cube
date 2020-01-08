@@ -15,6 +15,7 @@ public class PlayerMovementController : MonoBehaviour
     private bool flash = false;
     public Text scoreTxt;
     private int score = 0;
+    private int loadedLevelBuildIndex = 0;
 
     private void Awake()
 	{
@@ -23,8 +24,9 @@ public class PlayerMovementController : MonoBehaviour
         if (Application.isEditor) {
 			for (int i = 0; i < SceneManager.sceneCount; i++) {
 				Scene loadedScene = SceneManager.GetSceneAt(i);
-				if (loadedScene.name.Contains("Level ")) {
+				if (loadedScene.name.Contains("Level")) {
 					SceneManager.SetActiveScene(loadedScene);
+                    loadedLevelBuildIndex = loadedScene.buildIndex;
 					return;
 				}
 			}
@@ -35,18 +37,23 @@ public class PlayerMovementController : MonoBehaviour
 
 	IEnumerator LoadLevel (int levelBuildIndex) {
 		enabled = false;
+
+        if (loadedLevelBuildIndex > 0) {
+			yield return SceneManager.UnloadSceneAsync(loadedLevelBuildIndex);
+		}
+
 		yield return SceneManager.LoadSceneAsync(
 			levelBuildIndex, LoadSceneMode.Additive
 		);
 		SceneManager.SetActiveScene(
 			SceneManager.GetSceneByBuildIndex(levelBuildIndex)
 		);
+        loadedLevelBuildIndex = levelBuildIndex;
 		enabled = true;
 	}
 
 	private void Update()
 	{
-
         //Handle left right change
         int horizontalChange = 0;
 
@@ -77,8 +84,7 @@ public class PlayerMovementController : MonoBehaviour
             myCG.alpha = 1;
 
             //Reset position and velocity
-            this.transform.position = StartPos;
-            rb.velocity = new Vector2(0f, 0f);
+            resetPos();
             
             //Reset the scoreboard
             score ++;
@@ -99,14 +105,20 @@ public class PlayerMovementController : MonoBehaviour
 
 	}
 
+    void resetPos(){
+        this.transform.position = StartPos;
+        rb.velocity = new Vector2(0f, 0f);
+    }
     void OnCollisionExit2D(Collision2D other) {
         grounded = false;
     }
+
     void OnCollisionEnter2D(Collision2D col){
         if(col.gameObject.name == "Endpoint"){
             //Transition to the next level
-            Debug.Log("Hit end");
-            StartCoroutine(LoadLevel(2));
+            // Debug.Log("Hit end: level = " + loadedLevelBuildIndex);
+            resetPos();
+            StartCoroutine(LoadLevel(loadedLevelBuildIndex+1));
         }
         grounded = true;
     }
