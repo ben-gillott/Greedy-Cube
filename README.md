@@ -1,2 +1,2 @@
 # Platformer-Game
- Platforming game git3
+[alpha v1] A basic platformer with a greedy cube seeking treasure.
